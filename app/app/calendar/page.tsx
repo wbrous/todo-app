@@ -1,7 +1,5 @@
+import { CalendarComingSoon } from "@/components/calendar-coming-soon";
+
 export default function Page() {
-  return (
-    <div>
-      <p>Calendar</p>
-    </div>
-  );
+  return <CalendarComingSoon />;
 }
