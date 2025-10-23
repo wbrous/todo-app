@@ -3,7 +3,7 @@ import { v } from "convex/values";
 
 export const getItems = query({
   args: {
-    taskListId: v.id("taskLists"),
+    taskListId: v.id("todoList"),
   },
   handler: async (ctx, args) => {
     try {
@@ -29,12 +29,9 @@ export const getItems = query({
       }
 
       // Verify that the task list exists and belongs to the user
-      const taskList = await ctx.db
-        .query("taskLists")
-        .filter((q) => q.eq(q.field("id"), args.taskListId))
-        .first();
+      const taskList = await ctx.db.get(args.taskListId);
 
-      if (!taskList || taskList.owner !== identity.tokenIdentifier) {
+      if (!taskList || taskList.ownerId !== identity.tokenIdentifier) {
         return {
           code: 404,
           success: false,
@@ -43,9 +40,9 @@ export const getItems = query({
         };
       }
 
-      // Fetch the user's task lists using the identity token identifier
+      // Fetch the user's task items using the identity token identifier
       const todoItems = await ctx.db
-        .query("todoItems")
+        .query("todoItem")
         .filter((q) => q.eq(q.field("listId"), args.taskListId))
         .collect();
 
@@ -68,7 +65,7 @@ export const getItems = query({
 
 export const createTask = mutation({
   args: {
-    listId: v.string(),
+    listId: v.id("todoList"),
     title: v.string(),
     description: v.string(),
     dueDate: v.string(),
@@ -97,13 +94,9 @@ export const createTask = mutation({
       }
 
       // Check if provided list exists and is owned by the user
-      const todoList = await ctx.db
-        .query("todoLists")
-        .filter((q) => q.eq(q.field("id"), args.listId))
-        .filter((q) => q.eq(q.field("ownerId"), identity.tokenIdentifier))
-        .first();
+      const todoList = await ctx.db.get(args.listId);
 
-      if (!todoList) {
+      if (!todoList || todoList.ownerId !== identity.tokenIdentifier) {
         return {
           code: 404,
           success: false,
@@ -113,7 +106,7 @@ export const createTask = mutation({
       }
 
       // Create a new task item
-      const taskItem = await ctx.db.insert("todoItems", {
+      const taskItem = await ctx.db.insert("todoItem", {
         listId: args.listId,
         title: args.title,
         description: args.description,
@@ -125,7 +118,7 @@ export const createTask = mutation({
       return {
         code: 200,
         success: true,
-        taskListId: taskItem,
+        taskItemId: taskItem,
         timestamp: new Date().toISOString(),
       };
     } catch {
@@ -141,7 +134,7 @@ export const createTask = mutation({
 
 export const modifyTask = mutation({
   args: {
-    taskId: v.string(),
+    taskId: v.id("todoItem"),
     title: v.optional(v.string()),
     description: v.optional(v.string()),
     dueDate: v.optional(v.string()),
@@ -170,10 +163,7 @@ export const modifyTask = mutation({
       }
 
       // Find the task item
-      const taskItem = await ctx.db
-        .query("todoItems")
-        .filter((q) => q.eq(q.field("id"), args.taskId))
-        .first();
+      const taskItem = await ctx.db.get(args.taskId);
 
       if (!taskItem) {
         return {
@@ -184,23 +174,18 @@ export const modifyTask = mutation({
         };
       }
 
-      // Check if the parent task is owned by the user
-      const parentTask = await ctx.db
-        .query("todoItems")
-        .filter((q) => q.eq(q.field("id"), taskItem.parentId))
-        .first();
-
-      if (!parentTask || parentTask.ownerId !== identity.tokenIdentifier) {
+      // Check if the task is owned by the user
+      if (taskItem.ownerId !== identity.tokenIdentifier) {
         return {
-          code: 404,
+          code: 403,
           success: false,
-          error: "Task not found",
-          errorId: "task_not_found",
+          error: "Forbidden",
+          errorId: "forbidden",
         };
       }
 
       // Modify the task item
-      await ctx.db.patch(taskItem.id, {
+      await ctx.db.patch(args.taskId, {
         title: args.title,
         description: args.description,
         dueDate: args.dueDate,
@@ -209,7 +194,7 @@ export const modifyTask = mutation({
       return {
         code: 200,
         success: true,
-        taskListId: taskItem,
+        taskItemId: args.taskId,
         timestamp: new Date().toISOString(),
       };
     } catch {
@@ -225,7 +210,7 @@ export const modifyTask = mutation({
 
 export const deleteTask = mutation({
   args: {
-    taskId: v.string(),
+    taskId: v.id("todoItem"),
   },
   handler: async (ctx, args) => {
     try {
@@ -251,10 +236,7 @@ export const deleteTask = mutation({
       }
 
       // Find the task item
-      const taskItem = await ctx.db
-        .query("todoItems")
-        .filter((q) => q.eq(q.field("id"), args.taskId))
-        .first();
+      const taskItem = await ctx.db.get(args.taskId);
 
       if (!taskItem) {
         return {
@@ -265,23 +247,18 @@ export const deleteTask = mutation({
         };
       }
 
-      // Check if the parent task is owned by the user
-      const parentTask = await ctx.db
-        .query("todoItems")
-        .filter((q) => q.eq(q.field("id"), taskItem.parentId))
-        .first();
-
-      if (!parentTask || parentTask.ownerId !== identity.tokenIdentifier) {
+      // Check if the task is owned by the user
+      if (taskItem.ownerId !== identity.tokenIdentifier) {
         return {
-          code: 404,
+          code: 403,
           success: false,
-          error: "Task not found",
-          errorId: "task_not_found",
+          error: "Forbidden",
+          errorId: "forbidden",
         };
       }
 
       // Delete the task item
-      await ctx.db.delete(taskItem.id);
+      await ctx.db.delete(args.taskId);
 
       return {
         code: 200,

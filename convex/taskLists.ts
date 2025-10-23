@@ -27,8 +27,8 @@ export const getTaskList = query({
 
       // Fetch the user's task lists using the identity token identifier
       const taskLists = await ctx.db
-        .query("taskLists")
-        .filter((q) => q.eq(q.field("owner"), identity.tokenIdentifier))
+        .query("todoList")
+        .filter((q) => q.eq(q.field("ownerId"), identity.tokenIdentifier))
         .collect();
 
       return {
@@ -76,7 +76,7 @@ export const createTaskList = mutation({
 
       // Check if task list of same name already exists
       const existingTaskList = await ctx.db
-        .query("taskLists")
+        .query("todoList")
         .filter((q) => q.eq(q.field("name"), args.name))
         .collect();
       if (existingTaskList.length > 0) {
@@ -89,7 +89,7 @@ export const createTaskList = mutation({
       }
 
       // Create task list and save ID to variable
-      const taskListId = await ctx.db.insert("taskLists", {
+      const taskListId = await ctx.db.insert("todoList", {
         name: args.name,
         ownerId: identity?.tokenIdentifier,
       });
@@ -113,7 +113,7 @@ export const createTaskList = mutation({
 
 export const modifyTaskList = mutation({
   args: {
-    id: v.id("taskList"),
+    id: v.id("todoList"),
     name: v.string(),
   },
   handler: async (ctx, args) => {
@@ -140,7 +140,7 @@ export const modifyTaskList = mutation({
 
       // Check if task list of same name already exists that belongs to the user
       const existingTaskList = await ctx.db
-        .query("taskLists")
+        .query("todoList")
         .filter((q) => q.eq(q.field("name"), args.name))
         .filter((q) => q.eq(q.field("ownerId"), identity.tokenIdentifier))
         .collect();
@@ -177,7 +177,7 @@ export const modifyTaskList = mutation({
 
 export const deleteTaskList = mutation({
   args: {
-    id: v.id("taskList"),
+    id: v.id("todoList"),
   },
   handler: async (ctx, args) => {
     try {
@@ -203,7 +203,7 @@ export const deleteTaskList = mutation({
 
       // Check if task list belongs to the user
       const taskList = await ctx.db
-        .query("taskLists")
+        .query("todoList")
         .filter((q) => q.eq(q.field("id"), args.id))
         .filter((q) => q.eq(q.field("ownerId"), identity.tokenIdentifier))
         .first();
