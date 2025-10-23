@@ -17,7 +17,7 @@ export function WelcomeEmptyState() {
   const router = useRouter();
 
   return (
-    <Empty className="border border-dashed">
+    <Empty>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <IconRoad />
