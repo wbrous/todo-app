@@ -1,7 +1,5 @@
+import { WelcomeEmptyState } from "@/components/welcome-empty-state";
+
 export default function Page() {
-  return (
-    <div>
-      <p>Sup</p>
-    </div>
-  );
+  return <WelcomeEmptyState />;
 }
