@@ -1,7 +1,17 @@
 "use client";
 
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
+import * as React from "react";
+import {
+  Calendar,
+  Home,
+  Inbox,
+  Moon,
+  Search,
+  Settings,
+  Sun,
+} from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
+import { useTheme } from "next-themes";
 
 import {
   Sidebar,
@@ -36,6 +46,20 @@ const items = [
 
 export function AppSidebar() {
   const { openUserProfile } = useClerk();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const cycleTheme = () => {
+    if (theme === "light" || theme === "system") {
+      setTheme("dark");
+    } else {
+      setTheme("light");
+    }
+  };
 
   return (
     <Sidebar>
@@ -59,6 +83,35 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            type="button"
+            onClick={cycleTheme}
+            tooltip="Toggle theme"
+          >
+            {!mounted ? (
+              <>
+                <Sun className="h-[1.2rem] w-[1.2rem]" />
+                <span>Theme</span>
+              </>
+            ) : (
+              <>
+                {theme === "light" && (
+                  <>
+                    <Sun className="h-[1.2rem] w-[1.2rem]" />
+                    <span>Light Mode</span>
+                  </>
+                )}
+                {theme === "dark" && (
+                  <>
+                    <Moon className="h-[1.2rem] w-[1.2rem]" />
+                    <span>Dark Mode</span>
+                  </>
+                )}
+              </>
+            )}
+          </SidebarMenuButton>
+        </SidebarMenuItem>
         <SidebarMenuItem>
           <SidebarMenuButton
             type="button"
