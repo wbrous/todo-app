@@ -24,6 +24,7 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from "@/components/ui/sidebar";
+import { useRouter } from "next/navigation";
 
 // Menu items.
 const items = [
@@ -49,6 +50,8 @@ export function AppSidebar() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
+  const router = useRouter();
+
   React.useEffect(() => {
     setMounted(true);
   }, []);
@@ -70,11 +73,16 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                  <SidebarMenuButton
+                    asChild
+                    onClick={() => {
+                      router.push(item.url);
+                    }}
+                  >
+                    <p>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </p>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

@@ -24,7 +24,7 @@ export function WelcomeEmptyState() {
         </EmptyMedia>
         <EmptyTitle>Welcome</EmptyTitle>
         <EmptyDescription>
-          Start your journey by creating a first task or adding an event to your
+          Start your journey by creating a task or adding an event to your
           calendar.
         </EmptyDescription>
       </EmptyHeader>

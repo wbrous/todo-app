@@ -201,12 +201,8 @@ export const deleteTaskList = mutation({
         };
       }
 
-      // Check if task list belongs to the user
-      const taskList = await ctx.db
-        .query("todoList")
-        .filter((q) => q.eq(q.field("id"), args.id))
-        .filter((q) => q.eq(q.field("ownerId"), identity.tokenIdentifier))
-        .first();
+      // Check if task list exists
+      const taskList = await ctx.db.get(args.id);
 
       if (!taskList) {
         return {
@@ -214,6 +210,16 @@ export const deleteTaskList = mutation({
           success: false,
           error: "Task list not found",
           errorId: "task_list_not_found",
+        };
+      }
+
+      // Check if task list belongs to the user
+      if (taskList.ownerId !== identity.tokenIdentifier) {
+        return {
+          code: 403,
+          success: false,
+          error: "Forbidden",
+          errorId: "forbidden",
         };
       }
 

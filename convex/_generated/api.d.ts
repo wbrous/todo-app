@@ -8,6 +8,9 @@
  * @module
  */
 
+import type * as todoItems from "../todoItems.js";
+import type * as todoLists from "../todoLists.js";
+
 import type {
   ApiFromModules,
   FilterApi,
@@ -22,7 +25,10 @@ import type {
  * const myFunctionReference = api.myModule.myFunction;
  * ```
  */
-declare const fullApi: ApiFromModules<{}>;
+declare const fullApi: ApiFromModules<{
+  todoItems: typeof todoItems;
+  todoLists: typeof todoLists;
+}>;
 declare const fullApiWithMounts: typeof fullApi;
 
 export declare const api: FilterApi<
