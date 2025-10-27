@@ -30,6 +30,10 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     needs: lint
+    env:
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+      NEXT_PUBLIC_CONVEX_URL: ${{ secrets.NEXT_PUBLIC_CONVEX_URL }}
+      CLERK_FRONTEND_API_URL: ${{ secrets.CLERK_FRONTEND_API_URL }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
