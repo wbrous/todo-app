@@ -13,9 +13,7 @@ name: "CodeQL Analysis"
 
 on:
   push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main", "dev" ]
   schedule:
     - cron: '25 12 * * 4'
 
